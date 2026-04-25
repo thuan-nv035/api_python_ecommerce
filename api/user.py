@@ -4,10 +4,12 @@ import shutil
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, status, HTTPException, Header, Form, UploadFile, File
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Depends, Query, status, HTTPException, Form, UploadFile, File
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+
+from api.auth import get_current_user, SECRET_KEY, ALGORITHM
+from api.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import get_db
 from models.models import User
 from schemas.user import UserCreate, UserOut
@@ -22,32 +24,8 @@ def verify_password(plain_password, hashed_password):
     return bcrypt.checkpw(password_byte, hashed_byte)
 
 # Đây là chìa khóa bí mật, đừng cho ai biết!
-SECRET_KEY = "chuoi_bi_mat_cua_rieng_ban_123"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 # Token có hiệu lực trong 60 phút
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
-def get_current_user(
-    token: str = Depends(oauth2_scheme),  # Lấy token từ Header của request
-    db: Session = Depends(get_db)
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Không thể xác thực thông tin người dùng",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("username")
-        if username is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
 
-    # Tìm user trong Database dựa trên username từ Token
-    user = db.query(User).filter(User.username == username).first()
-    if user is None:
-        raise credentials_exception
-    return user
+
 
 @user_route.get("/")
 def get_all_users(

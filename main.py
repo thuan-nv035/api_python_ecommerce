@@ -1,12 +1,16 @@
 import uvicorn
 from fastapi import FastAPI
+from starlette.staticfiles import StaticFiles
 
+from api.middleware import AuthMiddleware
+from api.products import products_route
 from api.user import user_route
 
 app = FastAPI()
-
+app.add_middleware(AuthMiddleware)
 app.include_router(user_route)
-
+app.include_router(products_route)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8001)
