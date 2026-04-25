@@ -5,7 +5,63 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1112560f-32c1-4541-b31d-e21346a90d4a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/api/addresses.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/admin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/banners.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/brands.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/cart.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/categories.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/chat.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/coupons.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/flash_sales.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/inventory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/invoices.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/notifications.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/orders.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/payments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/product_collections.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/product_questions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/product_variants.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/profile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/recently_viewed.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/reports.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/returns.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/reviews.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/shipments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/support.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/uploads.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/wishlist.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/address_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/admin_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/banner_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/brand_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/cart_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/category_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/chat_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/coupon_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/flash_sale_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/inventory_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/invoice_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/notification_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/order_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/payment_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/product_collection_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/product_question_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/product_variant_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/profile_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/return_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/review_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/shipment_schema.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schemas/support_schema.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/middleware.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/middleware.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/products.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/products.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/schemas/user_schema.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,21 +162,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/api/user.py</url>
-          <line>29</line>
+          <line>19</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/api/user.py</url>
-          <line>87</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/api/user.py</url>
-          <line>100</line>
+          <line>81</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/database.py</url>
+          <line>1</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>

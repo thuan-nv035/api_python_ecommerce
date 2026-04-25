@@ -4,6 +4,7 @@ import shutil
 from typing import Optional, List
 from uuid import uuid4
 
+import bcrypt
 from fastapi import UploadFile, HTTPException
 
 UPLOAD_DIR = "uploads/products"
@@ -43,3 +44,19 @@ def parse_json_field(value: Optional[str]):
             status_code=400,
             detail="categories phải là JSON hợp lệ"
         )
+
+
+def hash_password(password: str):
+    # Chuyển mật khẩu sang dạng bytes
+    pwd_bytes = password.encode('utf-8')
+    # Tạo salt và mã hóa
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(pwd_bytes, salt)
+    # Trả về dạng chuỗi để lưu vào Database
+    return hashed_password.decode('utf-8')
+
+
+def verify_password(plain_password, hashed_password):
+    password_byte = plain_password.encode('utf-8')
+    hashed_byte = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(password_byte, hashed_byte)

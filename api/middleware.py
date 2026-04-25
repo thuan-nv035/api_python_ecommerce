@@ -31,8 +31,79 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         # Chỉ bắt đăng nhập với các API cần bảo vệ
         protected = (
-            path.startswith("/api/products")
-            and method in ["POST", "PUT", "PATCH", "DELETE"]
+                (
+                        path.startswith("/api/products")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/categories")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/coupons")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/banners")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/support")
+                        and not (path in ["/api/support", "/api/support/"] and method == "POST")
+                )
+                or (
+                        path.startswith("/api/product-variants")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/product-questions")
+                        and not (
+                        method == "GET"
+                        and path.startswith("/api/product-questions/product/")
+                    )
+                )
+                or (
+                        path.startswith("/api/flash-sales")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/brands")
+                        and method in ["POST", "PUT", "PATCH", "DELETE"]
+                )
+                or (
+                        path.startswith("/api/product-collections")
+                        and not (
+                        method == "GET"
+                        and (
+                                path == "/api/product-collections/active"
+                                or path.startswith("/api/product-collections/slug/")
+                        )
+                    )
+                )
+                or (
+                        path.startswith("/api/shipping-fee")
+                        and not (
+                        path == "/api/shipping-fee/calculate"
+                        and method == "POST"
+                )
+                )
+                or path.startswith("/api/cart")
+                or path.startswith("/api/orders")
+                or path.startswith("/api/addresses")
+                or path.startswith("/api/reviews/my")
+                or path.startswith("/api/wishlist")
+                or path.startswith("/api/profile")
+                or path.startswith("/api/payments")
+                or path.startswith("/api/admin")
+                or path.startswith("/api/inventory")
+                or path.startswith("/api/shipments")
+                or path.startswith("/api/notifications")
+                or path.startswith("/api/uploads")
+                or path.startswith("/api/reports")
+                or path.startswith("/api/returns")
+                or path.startswith("/api/reviews/my")
+                or path.startswith("/api/invoices")
+                or path.startswith("/api/chat")
         )
 
         if not protected:

@@ -12,20 +12,10 @@ from api.auth import get_current_user, SECRET_KEY, ALGORITHM
 from api.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import get_db
 from models.models import User
-from schemas.user import UserCreate, UserOut
+from schemas.user_schema import UserCreate, UserOut
+from utils import verify_password, hash_password
 
 user_route = APIRouter(prefix="/api/users", tags=["users"])
-
-import bcrypt
-
-def verify_password(plain_password, hashed_password):
-    password_byte = plain_password.encode('utf-8')
-    hashed_byte = hashed_password.encode('utf-8')
-    return bcrypt.checkpw(password_byte, hashed_byte)
-
-# Đây là chìa khóa bí mật, đừng cho ai biết!
-
-
 
 @user_route.get("/")
 def get_all_users(
@@ -84,15 +74,6 @@ def get_user_by_id(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
-def hash_password(password: str):
-    # Chuyển mật khẩu sang dạng bytes
-    pwd_bytes = password.encode('utf-8')
-    # Tạo salt và mã hóa
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(pwd_bytes, salt)
-    # Trả về dạng chuỗi để lưu vào Database
-    return hashed_password.decode('utf-8')
 
 @user_route.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(

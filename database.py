@@ -8,7 +8,7 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 if not DATABASE_URL:
-    DATABASE_URL = "postgresql://postgres:password@localhost:5432/ecom"
+    DATABASE_URL = "postgresql://postgres:10052000@localhost:5432/test1"
 
 engine = create_engine(DATABASE_URL)
 
