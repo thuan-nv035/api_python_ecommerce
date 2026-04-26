@@ -65,7 +65,7 @@ def invoice_to_dict(invoice: Invoice):
 def create_invoice(
         invoice_data: InvoiceCreate,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user())
+        current_user: User = Depends(get_current_user)
 ):
     current_user = current_user
 

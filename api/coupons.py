@@ -315,7 +315,7 @@ def update_coupon(
 def apply_coupon(
         apply_data: ApplyCouponSchema,
         db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user())
+        current_user: User = Depends(get_current_user)
 ):
     current_user_id = current_user.id
 
