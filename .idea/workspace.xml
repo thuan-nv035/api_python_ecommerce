@@ -4,28 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1112560f-32c1-4541-b31d-e21346a90d4a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/banners.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/banners.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/brands.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/brands.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/coupons.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/coupons.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/flash_sales.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/flash_sales.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/invoices.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/invoices.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/notifications.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/notifications.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/product_collections.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/product_collections.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/product_questions.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/product_questions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/product_variants.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/product_variants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/profile.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/recently_viewed.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/recently_viewed.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/reports.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/returns.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/returns.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/reviews.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/reviews.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/shipments.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/shipments.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/shipping_fee.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/shipping_fee.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/support.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/support.py" afterDir="false" />
-    </list>
+    <list default="true" id="1112560f-32c1-4541-b31d-e21346a90d4a" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
