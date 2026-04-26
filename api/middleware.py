@@ -104,6 +104,23 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 or path.startswith("/api/reviews/my")
                 or path.startswith("/api/invoices")
                 or path.startswith("/api/chat")
+                or path.startswith("/api/suppliers")
+                or path.startswith("/api/warehouses")
+                or path.startswith("/api/purchase-orders")
+                or path.startswith("/api/stock-movements")
+                or path.startswith("/api/expenses")
+                or path.startswith("/api/expense-categories")
+                or path.startswith("/api/accounting")
+                or path.startswith("/api/departments")
+                or path.startswith("/api/employees")
+                or path.startswith("/api/roles")
+                or path.startswith("/api/permissions")
+                or path.startswith("/api/me/permissions")
+                or (
+                        path.startswith("/api/users")
+                        and "/roles" in path
+                )
+                or path.startswith("/api/audit-logs")
         )
 
         if not protected:

@@ -245,7 +245,10 @@ class Inventory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    variant_id = Column(Integer, ForeignKey("product_variants.id"), nullable=True)
 
     size = Column(String(50))
     color = Column(String(50))
@@ -256,16 +259,9 @@ class Inventory(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    warehouse = relationship("Warehouse")
     product = relationship("Products")
-
-    __table_args__ = (
-        UniqueConstraint(
-            "product_id",
-            "size",
-            "color",
-            name="unique_product_size_color_inventory"
-        ),
-    )
+    variant = relationship("ProductVariant")
 
 class Shipment(Base):
     __tablename__ = "shipments"
@@ -684,3 +680,359 @@ class ShippingRate(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Supplier(Base):
+    __tablename__ = "suppliers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    code = Column(String(255), nullable=False, unique=True, index=True)
+    phone = Column(String(20))
+    email = Column(String(255))
+    address = Column(String(255))
+    tax_code = Column(String(100))
+    contact_person = Column(String(100))
+
+    status = Column(String(50), default="active")
+    # active, inactive
+    note = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    phone = Column(String(20))
+    address = Column(Text)
+
+    province = Column(String(255))
+    district = Column(String(255))
+    ward = Column(String(255))
+
+    manager_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    is_active = Column(Boolean, default=True)
+
+    note = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    manager = relationship("User")
+
+class PurchaseOrder(Base):
+    __tablename__ = "purchase_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=False)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
+
+    status = Column(String(50), default="draft")
+    # draft, pending, partial_received, received, cancelled
+
+    order_date = Column(DateTime(timezone=True), server_default=func.now())
+    expected_date = Column(DateTime(timezone=True))
+
+    subtotal = Column(Float, nullable=False, default=0)
+    tax_amount = Column(Float, nullable=False, default=0)
+    shipping_fee = Column(Float, nullable=False, default=0)
+    discount_amount = Column(Float, nullable=False, default=0)
+    total_amount = Column(Float, nullable=False, default=0)
+
+    note = Column(Text)
+
+    created_by_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    confirmed_by_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    received_at = Column(DateTime(timezone=True))
+    cancelled_at = Column(DateTime(timezone=True))
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    supplier = relationship("Supplier")
+    warehouse = relationship("Warehouse")
+
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    confirmed_by = relationship("User", foreign_keys=[confirmed_by_id])
+
+    items = relationship(
+        "PurchaseOrderItem",
+        back_populates="purchase_order",
+        cascade="all, delete-orphan"
+    )
+
+
+class PurchaseOrderItem(Base):
+    __tablename__ = "purchase_order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    purchase_order_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=False)
+
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    variant_id = Column(Integer, ForeignKey("product_variants.id"), nullable=True)
+
+    quantity = Column(Integer, nullable=False, default=1)
+    received_quantity = Column(Integer, nullable=False, default=0)
+
+    unit_cost = Column(Float, nullable=False, default=0)
+    total_cost = Column(Float, nullable=False, default=0)
+
+    note = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    purchase_order = relationship("PurchaseOrder", back_populates="items")
+    product = relationship("Products")
+    variant = relationship("ProductVariant")
+
+class StockMovement(Base):
+    __tablename__ = "stock_movements"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
+
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    variant_id = Column(Integer, ForeignKey("product_variants.id"), nullable=True)
+
+    movement_type = Column(String(50), nullable=False)
+    # import, export, adjust, return, transfer
+
+    quantity = Column(Integer, nullable=False)
+
+    before_quantity = Column(Integer, nullable=False, default=0)
+    after_quantity = Column(Integer, nullable=False, default=0)
+
+    reference_type = Column(String(100))
+    # purchase_order, order, return_request, manual_adjust
+
+    reference_id = Column(Integer)
+
+    note = Column(Text)
+
+    created_by_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    warehouse = relationship("Warehouse")
+    product = relationship("Products")
+    variant = relationship("ProductVariant")
+    created_by = relationship("User")
+
+class ExpenseCategory(Base):
+    __tablename__ = "expense_categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    desc = Column(Text)
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class Expense(Base):
+    __tablename__ = "expenses"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    title = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    category_id = Column(Integer, ForeignKey("expense_categories.id"), nullable=True)
+
+    amount = Column(Float, nullable=False, default=0)
+
+    payment_method = Column(String(50), default="cash")
+    # cash, bank_transfer, card, other
+
+    status = Column(String(50), default="pending")
+    # pending, approved, paid, cancelled
+
+    expense_date = Column(DateTime(timezone=True), server_default=func.now())
+
+    note = Column(Text)
+
+    created_by_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    approved_by_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    approved_at = Column(DateTime(timezone=True))
+    paid_at = Column(DateTime(timezone=True))
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    category = relationship("ExpenseCategory")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    approved_by = relationship("User", foreign_keys=[approved_by_id])
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    desc = Column(Text)
+
+    manager_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    manager = relationship("User")
+
+
+class Employee(Base):
+    __tablename__ = "employees"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+
+    employee_code = Column(String(100), unique=True, nullable=False, index=True)
+
+    full_name = Column(String(255), nullable=False)
+    phone = Column(String(20))
+    email = Column(String(255))
+    address = Column(Text)
+
+    position = Column(String(255))
+    salary = Column(Float, default=0)
+
+    hire_date = Column(DateTime(timezone=True))
+    birth_date = Column(DateTime(timezone=True))
+
+    status = Column(String(50), default="active")
+    # active, inactive, resigned
+
+    note = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+    department = relationship("Department")
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    desc = Column(Text)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class Permission(Base):
+    __tablename__ = "permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    code = Column(String(100), unique=True, nullable=False, index=True)
+
+    module = Column(String(100))
+    desc = Column(Text)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class RolePermission(Base):
+    __tablename__ = "role_permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+    permission_id = Column(Integer, ForeignKey("permissions.id"), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    role = relationship("Role")
+    permission = relationship("Permission")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "role_id",
+            "permission_id",
+            name="unique_role_permission"
+        ),
+    )
+
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
+    role = relationship("Role")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "role_id",
+            name="unique_user_role"
+        ),
+    )
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+
+    action = Column(String(100), nullable=False)
+    # create, update, delete, login, logout, approve, cancel, adjust_stock...
+
+    module = Column(String(100), nullable=False)
+    # products, orders, inventory, accounting, hr, supplier...
+
+    resource_type = Column(String(100))
+    # Product, Order, PurchaseOrder, Expense...
+
+    resource_id = Column(Integer)
+
+    old_data = Column(JSON)
+    new_data = Column(JSON)
+
+    ip_address = Column(String(100))
+    user_agent = Column(Text)
+
+    note = Column(Text)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")

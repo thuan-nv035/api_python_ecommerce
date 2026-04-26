@@ -13,7 +13,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
 def get_admin_user(request: Request):
     current_user = getattr(request.state, "current_user", None)
-    print('current', current_user)
     if current_user is None:
         raise HTTPException(
             status_code=401,
