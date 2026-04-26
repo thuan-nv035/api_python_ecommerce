@@ -4,41 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import Brand, User, Products
 from schemas.brand_schema import BrandCreate, BrandUpdate
 
 
 brands_route = APIRouter(prefix="/api/brands", tags=["brands"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
 
 def brand_to_dict(brand: Brand):
     return {
@@ -162,8 +134,7 @@ def create_brand(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     slug = brand_data.slug.strip().lower()
 
@@ -212,8 +183,7 @@ def update_brand(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
 
@@ -275,8 +245,7 @@ def delete_brand(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     brand = db.query(Brand).filter(Brand.id == brand_id).first()
 

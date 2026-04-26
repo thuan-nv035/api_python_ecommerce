@@ -3,6 +3,7 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import User, ShippingRate
 from schemas.shipping_fee_schema import (
@@ -16,35 +17,6 @@ shipping_fee_route = APIRouter(
     prefix="/api/shipping-fee",
     tags=["shipping-fee"]
 )
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
 
 def normalize_text(value):
     if value is None:
@@ -214,8 +186,7 @@ def get_shipping_rates(
         province: str = Query(None),
         is_active: bool = Query(None)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     query = db.query(ShippingRate)
 
@@ -259,8 +230,7 @@ def get_shipping_rate_by_id(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     rate = db.query(ShippingRate).filter(ShippingRate.id == rate_id).first()
 
@@ -288,8 +258,7 @@ def create_shipping_rate(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     province = normalize_text(rate_data.province)
     district = normalize_text(rate_data.district)
@@ -351,8 +320,7 @@ def update_shipping_rate(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     rate = db.query(ShippingRate).filter(ShippingRate.id == rate_id).first()
 
@@ -424,8 +392,7 @@ def delete_shipping_rate(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     rate = db.query(ShippingRate).filter(ShippingRate.id == rate_id).first()
 

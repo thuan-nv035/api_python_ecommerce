@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import (
     User,
@@ -21,26 +22,6 @@ from schemas.flash_sale_schema import (
 
 
 flash_sales_route = APIRouter(prefix="/api/flash-sales", tags=["flash-sales"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(status_code=401, detail="Bạn chưa đăng nhập")
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Không tìm thấy user")
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(status_code=403, detail="Bạn không có quyền admin")
-
 
 def flash_sale_item_to_dict(item: FlashSaleItem):
     product = item.product
@@ -165,8 +146,7 @@ def get_all_flash_sales(
         limit: int = Query(20, gt=0),
         is_active: bool = Query(None)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     query = db.query(FlashSale)
 
@@ -236,8 +216,7 @@ def create_flash_sale(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     if flash_sale_data.end_at <= flash_sale_data.start_at:
         raise HTTPException(
@@ -278,8 +257,7 @@ def update_flash_sale(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     flash_sale = (
         db.query(FlashSale)
@@ -334,8 +312,7 @@ def delete_flash_sale(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     flash_sale = (
         db.query(FlashSale)
@@ -371,8 +348,7 @@ def add_flash_sale_item(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     flash_sale = (
         db.query(FlashSale)
@@ -465,8 +441,7 @@ def update_flash_sale_item(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     item = (
         db.query(FlashSaleItem)
@@ -519,8 +494,7 @@ def delete_flash_sale_item(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     item = (
         db.query(FlashSaleItem)

@@ -2,30 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import User, Products, Order, OrderItem, CartItem, Review, Payment
 from schemas.admin_schema import UpdateOrderStatusSchema, UpdateUserRoleSchema
 
 
 admin_route = APIRouter(prefix="/api/admin", tags=["admin"])
-
-
-def get_admin_user(request: Request):
-    current_user = getattr(request.state, "current_user", None)
-    print('current', current_user)
-    if current_user is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    if getattr(current_user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
-    return current_user
 
 
 def order_to_dict(order: Order):

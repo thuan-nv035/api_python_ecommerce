@@ -1,33 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import Notification, User
 from schemas.notification_schema import NotificationCreate
 
 
 notifications_route = APIRouter(prefix="/api/notifications", tags=["notifications"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
 
 def is_admin(user: User):
     return getattr(user, "role", "user") == "admin"
@@ -76,10 +56,9 @@ def create_notification(
 
 @notifications_route.get("/")
 def get_my_notifications(
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     notifications = (
         db.query(Notification)
@@ -111,10 +90,9 @@ def get_my_notifications(
 
 @notifications_route.get("/unread-count")
 def get_unread_count(
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     unread_count = (
         db.query(Notification)
@@ -139,10 +117,9 @@ def get_unread_count(
 @notifications_route.post("/")
 def admin_create_notification(
         notification_data: NotificationCreate,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -180,10 +157,9 @@ def admin_create_notification(
 
 @notifications_route.patch("/read-all")
 def mark_all_as_read(
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     db.query(Notification).filter(
         Notification.user_id == current_user.id,
@@ -207,10 +183,9 @@ def mark_all_as_read(
 @notifications_route.patch("/{notification_id}/read")
 def mark_notification_as_read(
         notification_id: int,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     notification = (
         db.query(Notification)
@@ -246,10 +221,9 @@ def mark_notification_as_read(
 @notifications_route.delete("/{notification_id}")
 def delete_notification(
         notification_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     notification = (
         db.query(Notification)

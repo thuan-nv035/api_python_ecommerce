@@ -2,6 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import RecentlyViewedProduct, Products, User
 
@@ -10,27 +11,6 @@ recently_viewed_route = APIRouter(
     prefix="/api/recently-viewed",
     tags=["recently-viewed"]
 )
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
 
 def recently_viewed_to_dict(item: RecentlyViewedProduct):
     product = item.product
@@ -61,10 +41,10 @@ def recently_viewed_to_dict(item: RecentlyViewedProduct):
 @recently_viewed_route.post("/{product_id}")
 def add_recently_viewed_product(
         product_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
+    current_user = current_user.id
 
     product = db.query(Products).filter(Products.id == product_id).first()
 
@@ -117,11 +97,10 @@ def add_recently_viewed_product(
 
 @recently_viewed_route.get("/")
 def get_recently_viewed_products(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
         limit: int = Query(10, gt=0)
 ):
-    current_user = get_current_user(request, db)
 
     items = (
         db.query(RecentlyViewedProduct)
@@ -145,10 +124,9 @@ def get_recently_viewed_products(
 
 @recently_viewed_route.delete("/clear/all")
 def clear_recently_viewed_products(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     db.query(RecentlyViewedProduct).filter(
         RecentlyViewedProduct.user_id == current_user.id
@@ -169,10 +147,9 @@ def clear_recently_viewed_products(
 @recently_viewed_route.delete("/{product_id}")
 def delete_recently_viewed_product(
         product_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     item = (
         db.query(RecentlyViewedProduct)

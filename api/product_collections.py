@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import User, Products, ProductCollection, ProductCollectionItem
 from schemas.product_collection_schema import (
@@ -19,35 +20,6 @@ product_collections_route = APIRouter(
     prefix="/api/product-collections",
     tags=["product-collections"]
 )
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
 
 def is_collection_available(collection: ProductCollection):
     now = datetime.now(timezone.utc)
@@ -202,8 +174,7 @@ def get_all_collections(
         search: str = Query(None),
         is_active: bool = Query(None)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     query = db.query(ProductCollection)
 
@@ -255,8 +226,7 @@ def get_collection_by_id(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     collection = (
         db.query(ProductCollection)
@@ -288,8 +258,7 @@ def create_collection(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     slug = collection_data.slug.strip().lower()
 
@@ -346,9 +315,7 @@ def update_collection(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
-
+    get_admin_user(request)
     collection = (
         db.query(ProductCollection)
         .filter(ProductCollection.id == collection_id)
@@ -422,8 +389,7 @@ def delete_collection(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     collection = (
         db.query(ProductCollection)
@@ -459,8 +425,7 @@ def add_product_to_collection(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     collection = (
         db.query(ProductCollection)
@@ -531,8 +496,7 @@ def update_collection_item(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     item = (
         db.query(ProductCollectionItem)
@@ -578,8 +542,7 @@ def remove_product_from_collection(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     item = (
         db.query(ProductCollectionItem)

@@ -5,38 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import User, Products, Order, OrderItem, Payment, Review
 
-
 reports_route = APIRouter(prefix="/api/reports", tags=["reports"])
-
-
-def get_admin_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
-    return user
-
 
 def parse_date(date_str: Optional[str]):
     if not date_str:
@@ -72,7 +45,7 @@ def get_overview_report(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    get_admin_user(request, db)
+    get_admin_user(request)
 
     total_users = db.query(User).count()
     total_products = db.query(Products).count()
@@ -152,7 +125,7 @@ def get_revenue_report(
         start_date: Optional[str] = Query(None),
         end_date: Optional[str] = Query(None)
 ):
-    get_admin_user(request, db)
+    get_admin_user(request)
 
     start = parse_date(start_date)
     end = parse_date(end_date)
@@ -212,7 +185,7 @@ def get_top_products_report(
         start_date: Optional[str] = Query(None),
         end_date: Optional[str] = Query(None)
 ):
-    get_admin_user(request, db)
+    get_admin_user(request)
 
     start = parse_date(start_date)
     end = parse_date(end_date)
@@ -270,7 +243,7 @@ def get_order_status_report(
         start_date: Optional[str] = Query(None),
         end_date: Optional[str] = Query(None)
 ):
-    get_admin_user(request, db)
+    get_admin_user(request)
 
     start = parse_date(start_date)
     end = parse_date(end_date)

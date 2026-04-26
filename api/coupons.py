@@ -4,25 +4,13 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
-from models.models import Coupon, CouponUsage
+from models.models import Coupon, CouponUsage, User
 from schemas.coupon_schema import CouponCreate, CouponUpdate, ApplyCouponSchema
 
 
 coupons_route = APIRouter(prefix="/api/coupons", tags=["coupons"])
-
-
-def get_current_user_id(request: Request):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    return current_user_id
-
 
 def coupon_to_dict(coupon: Coupon):
     return {
@@ -326,10 +314,10 @@ def update_coupon(
 @coupons_route.post("/apply")
 def apply_coupon(
         apply_data: ApplyCouponSchema,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user())
 ):
-    current_user_id = get_current_user_id(request)
+    current_user_id = current_user.id
 
     result = validate_coupon(
         db=db,

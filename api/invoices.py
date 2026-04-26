@@ -4,32 +4,13 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import User, Order, Payment, Shipment, Invoice
 from schemas.invoice_schema import InvoiceCreate, InvoiceStatusUpdate
 
 
 invoices_route = APIRouter(prefix="/api/invoices", tags=["invoices"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
 
 
 def is_admin(user: User):
@@ -83,10 +64,10 @@ def invoice_to_dict(invoice: Invoice):
 @invoices_route.post("/")
 def create_invoice(
         invoice_data: InvoiceCreate,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user())
 ):
-    current_user = get_current_user(request, db)
+    current_user = current_user
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -167,10 +148,9 @@ def create_invoice(
 
 @invoices_route.get("/my")
 def get_my_invoices(
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     invoices = (
         db.query(Invoice)
@@ -194,10 +174,9 @@ def get_my_invoices(
 @invoices_route.get("/order/{order_id}")
 def get_invoice_by_order(
         order_id: int,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     invoice = (
         db.query(Invoice)
@@ -236,9 +215,9 @@ def get_all_invoices(
         page: int = Query(1, gt=0),
         limit: int = Query(20, gt=0),
         status: str = Query(None),
-        payment_status: str = Query(None)
+        payment_status: str = Query(None),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -285,10 +264,9 @@ def get_all_invoices(
 @invoices_route.get("/{invoice_id}")
 def get_invoice_by_id(
         invoice_id: int,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
 
@@ -320,10 +298,9 @@ def get_invoice_by_id(
 def update_invoice_status(
         invoice_id: int,
         status_data: InvoiceStatusUpdate,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -403,10 +380,9 @@ def update_invoice_status(
 @invoices_route.delete("/{invoice_id}")
 def delete_invoice(
         invoice_id: int,
-        request: Request,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(

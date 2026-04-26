@@ -3,33 +3,12 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import User, Order, OrderItem, Payment, ReturnRequest
 from schemas.return_schema import ReturnRequestCreate, ReturnStatusUpdate
 
-
 returns_route = APIRouter(prefix="/api/returns", tags=["returns"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
 
 def is_admin(user: User):
     return getattr(user, "role", "user") == "admin"
@@ -74,10 +53,9 @@ def return_to_dict(return_request: ReturnRequest):
 @returns_route.post("/")
 def create_return_request(
         return_data: ReturnRequestCreate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     order = (
         db.query(Order)
@@ -160,10 +138,9 @@ def create_return_request(
 
 @returns_route.get("/my")
 def get_my_returns(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     returns = (
         db.query(ReturnRequest)
@@ -186,13 +163,12 @@ def get_my_returns(
 
 @returns_route.get("/")
 def get_all_returns(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
         page: int = Query(1, gt=0),
         limit: int = Query(20, gt=0),
         status: str = Query(None)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -236,10 +212,9 @@ def get_all_returns(
 @returns_route.get("/{return_id}")
 def get_return_by_id(
         return_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     return_request = (
         db.query(ReturnRequest)
@@ -275,10 +250,9 @@ def get_return_by_id(
 def update_return_status(
         return_id: int,
         status_data: ReturnStatusUpdate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -346,10 +320,9 @@ def update_return_status(
 @returns_route.patch("/{return_id}/cancel")
 def cancel_return_request(
         return_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     return_request = (
         db.query(ReturnRequest)

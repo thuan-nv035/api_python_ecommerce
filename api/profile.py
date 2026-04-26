@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import User
 from schemas.profile_schema import ChangePasswordSchema
@@ -15,19 +16,6 @@ profile_route = APIRouter(prefix="/api/profile", tags=["profile"])
 
 AVATAR_UPLOAD_DIR = "static/avatars"
 os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
-
-
-def get_current_user_id(request: Request):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    return current_user_id
-
 
 def user_to_dict(user: User):
     return {
@@ -59,10 +47,10 @@ def save_avatar_file(file: UploadFile):
 
 @profile_route.get("/me")
 def get_my_profile(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user_id = get_current_user_id(request)
+    current_user_id = current_user.id
 
     user = db.query(User).filter(User.id == current_user_id).first()
 
@@ -85,12 +73,12 @@ def get_my_profile(
 
 @profile_route.put("/me")
 def update_my_profile(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         username: Optional[str] = Form(None),
         avatar: Optional[UploadFile] = File(None),
         db: Session = Depends(get_db)
 ):
-    current_user_id = get_current_user_id(request)
+    current_user_id = current_user.id
 
     user = db.query(User).filter(User.id == current_user_id).first()
 
@@ -148,10 +136,10 @@ def update_my_profile(
 @profile_route.put("/change-password")
 def change_password(
         password_data: ChangePasswordSchema,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user_id = get_current_user_id(request)
+    current_user_id = current_user.id
 
     user = db.query(User).filter(User.id == current_user_id).first()
 

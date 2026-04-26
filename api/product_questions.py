@@ -4,6 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from database import get_db
 from models.models import User, Products, ProductQuestion
 from schemas.product_question_schema import (
@@ -17,27 +18,6 @@ product_questions_route = APIRouter(
     prefix="/api/product-questions",
     tags=["product-questions"]
 )
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
 
 def is_admin(user: User):
     return getattr(user, "role", "user") == "admin"
@@ -84,11 +64,9 @@ def question_to_dict(question: ProductQuestion):
 @product_questions_route.post("/")
 def create_product_question(
         question_data: ProductQuestionCreate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-
     product = (
         db.query(Products)
         .filter(Products.id == question_data.product_id)
@@ -178,10 +156,9 @@ def get_questions_by_product(
 
 @product_questions_route.get("/my")
 def get_my_questions(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     questions = (
         db.query(ProductQuestion)
@@ -204,14 +181,13 @@ def get_my_questions(
 
 @product_questions_route.get("/")
 def get_all_questions(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
         page: int = Query(1, gt=0),
         limit: int = Query(20, gt=0),
         status: str = Query(None),
         product_id: int = Query(None)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -258,10 +234,9 @@ def get_all_questions(
 @product_questions_route.get("/{question_id}")
 def get_question_by_id(
         question_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     question = (
         db.query(ProductQuestion)
@@ -300,10 +275,9 @@ def get_question_by_id(
 def update_my_question(
         question_id: int,
         question_data: ProductQuestionUpdate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     question = (
         db.query(ProductQuestion)
@@ -356,10 +330,9 @@ def update_my_question(
 def answer_product_question(
         question_id: int,
         answer_data: ProductQuestionAnswer,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -411,10 +384,9 @@ def answer_product_question(
 @product_questions_route.patch("/{question_id}/hide")
 def hide_product_question(
         question_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -455,10 +427,9 @@ def hide_product_question(
 @product_questions_route.delete("/{question_id}")
 def delete_product_question(
         question_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     question = (
         db.query(ProductQuestion)

@@ -8,9 +8,7 @@ from database import get_db
 from models.models import Products, Review, User
 from schemas.review_schema import ReviewCreate, ReviewUpdate
 
-
 reviews_route = APIRouter(prefix="/api/reviews", tags=["reviews"])
-
 
 def review_to_dict(review: Review):
     return {
@@ -42,7 +40,6 @@ def review_to_dict(review: Review):
 @reviews_route.post("/")
 def create_review(
         review_data: ReviewCreate,
-        request: Request,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -146,7 +143,6 @@ def get_reviews_by_product(
 
 @reviews_route.get("/my")
 def get_my_reviews(
-        request: Request,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -200,7 +196,6 @@ def get_review_by_id(
 def update_review(
         review_id: int,
         review_data: ReviewUpdate,
-        request: Request,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -249,7 +244,6 @@ def update_review(
 @reviews_route.delete("/{review_id}")
 def delete_review(
         review_id: int,
-        request: Request,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):

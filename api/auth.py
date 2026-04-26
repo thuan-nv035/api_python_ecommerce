@@ -1,3 +1,5 @@
+from urllib.request import Request
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -9,6 +11,22 @@ from models.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
+def get_admin_user(request: Request):
+    current_user = getattr(request.state, "current_user", None)
+    print('current', current_user)
+    if current_user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Bạn chưa đăng nhập"
+        )
+
+    if getattr(current_user, "role", "user") != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền admin"
+        )
+
+    return current_user
 
 def get_current_user(
         token: str = Depends(oauth2_scheme),

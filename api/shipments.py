@@ -3,34 +3,13 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user
 from api.notifications import create_notification
 from database import get_db
 from models.models import Shipment, Order, User
 from schemas.shipment_schema import ShipmentCreate, ShipmentUpdate
 
-
 shipments_route = APIRouter(prefix="/api/shipments", tags=["shipments"])
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
 
 def is_admin(user: User):
     return getattr(user, "role", "user") == "admin"
@@ -62,10 +41,9 @@ def shipment_to_dict(shipment: Shipment):
 @shipments_route.post("/")
 def create_shipment(
         shipment_data: ShipmentCreate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -126,10 +104,9 @@ def create_shipment(
 
 @shipments_route.get("/my")
 def get_my_shipments(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     shipments = (
         db.query(Shipment)
@@ -152,11 +129,10 @@ def get_my_shipments(
 
 @shipments_route.get("/")
 def get_all_shipments(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
         status: str = Query(None)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -189,10 +165,9 @@ def get_all_shipments(
 @shipments_route.get("/order/{order_id}")
 def get_shipment_by_order(
         order_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     shipment = (
         db.query(Shipment)
@@ -226,10 +201,9 @@ def get_shipment_by_order(
 @shipments_route.get("/{shipment_id}")
 def get_shipment_by_id(
         shipment_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     shipment = db.query(Shipment).filter(Shipment.id == shipment_id).first()
 
@@ -263,10 +237,9 @@ def get_shipment_by_id(
 def update_shipment(
         shipment_id: int,
         shipment_data: ShipmentUpdate,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(
@@ -371,10 +344,9 @@ def update_shipment(
 @shipments_route.delete("/{shipment_id}")
 def delete_shipment(
         shipment_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
 
     if not is_admin(current_user):
         raise HTTPException(

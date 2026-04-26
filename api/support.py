@@ -3,6 +3,7 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_current_user, get_admin_user
 from database import get_db
 from models.models import SupportTicket, User, Order
 from schemas.support_schema import SupportTicketCreate, SupportTicketStatusUpdate
@@ -18,35 +19,6 @@ def get_current_user_optional(request: Request, db: Session):
         return None
 
     return db.query(User).filter(User.id == current_user_id).first()
-
-
-def get_current_user_required(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
 
 def ticket_to_dict(ticket: SupportTicket):
     return {
@@ -127,10 +99,9 @@ def create_support_ticket(
 
 @support_route.get("/my")
 def get_my_support_tickets(
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user_required(request, db)
 
     tickets = (
         db.query(SupportTicket)
@@ -159,8 +130,7 @@ def get_all_support_tickets(
         limit: int = Query(20, gt=0),
         status: str = Query(None)
 ):
-    current_user = get_current_user_required(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     query = db.query(SupportTicket)
 
@@ -198,10 +168,9 @@ def get_all_support_tickets(
 @support_route.get("/{ticket_id}")
 def get_support_ticket_by_id(
         ticket_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user_required(request, db)
 
     ticket = db.query(SupportTicket).filter(SupportTicket.id == ticket_id).first()
 
@@ -239,8 +208,7 @@ def update_support_ticket_status(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user_required(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     allowed_status = [
         "pending",
@@ -286,10 +254,9 @@ def update_support_ticket_status(
 @support_route.delete("/{ticket_id}")
 def delete_support_ticket(
         ticket_id: int,
-        request: Request,
+        current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user_required(request, db)
 
     ticket = db.query(SupportTicket).filter(SupportTicket.id == ticket_id).first()
 

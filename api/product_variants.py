@@ -3,6 +3,7 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
 
+from api.auth import get_admin_user
 from database import get_db
 from models.models import Products, ProductVariant, User
 from schemas.product_variant_schema import (
@@ -16,35 +17,6 @@ product_variants_route = APIRouter(
     prefix="/api/product-variants",
     tags=["product-variants"]
 )
-
-
-def get_current_user(request: Request, db: Session):
-    current_user_id = getattr(request.state, "current_user_id", None)
-
-    if current_user_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Bạn chưa đăng nhập"
-        )
-
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Không tìm thấy user"
-        )
-
-    return user
-
-
-def check_admin(user: User):
-    if getattr(user, "role", "user") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Bạn không có quyền admin"
-        )
-
 
 def variant_to_dict(variant: ProductVariant):
     product = variant.product
@@ -205,8 +177,7 @@ def create_variant(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     product = (
         db.query(Products)
@@ -286,8 +257,7 @@ def update_variant(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     variant = (
         db.query(ProductVariant)
@@ -371,8 +341,7 @@ def add_variant_stock(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     if stock_data.quantity <= 0:
         raise HTTPException(
@@ -415,8 +384,7 @@ def delete_variant(
         request: Request,
         db: Session = Depends(get_db)
 ):
-    current_user = get_current_user(request, db)
-    check_admin(current_user)
+    get_admin_user(request)
 
     variant = (
         db.query(ProductVariant)
